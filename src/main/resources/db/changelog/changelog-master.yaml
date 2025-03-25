@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: changes/001-enums.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/002-initial-schema.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/003-indexes.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/004-test-data.sql
+      relativeToChangelogFile: true

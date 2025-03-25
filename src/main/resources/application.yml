@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/booking_db
+    username: tst
+    password: tst
+    pool:
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30m
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/booking_db
+    username: tst
+    password: tst
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog-master.yaml
+    default-schema: public
+    user: tst
+    password: tst
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/booking_db
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+logging:
+  level:
+    liquibase: DEBUG
+    org.springframework: DEBUG
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
