@@ -18,7 +18,7 @@ CREATE INDEX idx_units_rooms_number ON units(rooms_number);
 
 --preconditions onFail:MARK_RAN
 --precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = 'idx_bookings_date_range'
-CREATE INDEX idx_bookings_date_range ON bookings(start_date, end_date);
+CREATE INDEX idx_bookings_unit_id_date_range ON bookings(unit_id, start_date, end_date);
 --rollback DROP INDEX IF EXISTS idx_bookings_date_range;
 
 --preconditions onFail:MARK_RAN

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset mak.dz:1 dbms:postgresql context:initial-schema
+--changeset mak.dzehtsiarou:1 dbms:postgresql context:initial-schema
 CREATE SEQUENCE IF NOT EXISTS units_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS users_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS bookings_seq START WITH 1 INCREMENT BY 1;
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS units (
     floor INTEGER NOT NULL,
     base_cost DECIMAL(10,2) NOT NULL,
     description TEXT,
-    is_available BOOLEAN DEFAULT true,
+    is_available BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT rooms_number_positive CHECK (rooms_number > 0),
@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT email_valid CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
     );
 
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     status booking_status NOT NULL DEFAULT 'PENDING',
     total_cost DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_unit FOREIGN KEY (unit_id) REFERENCES units(id),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT dates_valid CHECK (end_date >= start_date),
@@ -55,6 +57,7 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_date TIMESTAMP WITH TIME ZONE,
     expiration_date TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
     CONSTRAINT amount_positive CHECK (amount > 0)
     );
@@ -67,4 +70,4 @@ CREATE TABLE IF NOT EXISTS events (
     event_type event_type NOT NULL,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                             );
+);
