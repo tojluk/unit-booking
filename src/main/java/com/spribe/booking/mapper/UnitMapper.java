@@ -34,9 +34,7 @@ public class UnitMapper {
                 unit.calculateTotalCost(),
                 //TODO: flag must be set by Booking wit rage of periods
                 unit.isAvailable(),
-                unit.getDescription(),
-                unit.getCreatedAt(),
-                unit.getUpdatedAt()
+                unit.getDescription()
         );
     }
 }

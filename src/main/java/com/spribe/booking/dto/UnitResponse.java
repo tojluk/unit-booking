@@ -3,7 +3,6 @@ package com.spribe.booking.dto;
 import com.spribe.booking.model.types.AccommodationType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public record UnitResponse(
         Long id,
@@ -13,7 +12,5 @@ public record UnitResponse(
         BigDecimal baseCost,
         BigDecimal totalCost,
         Boolean isAvailable,
-        String description,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        String description
 ) {}

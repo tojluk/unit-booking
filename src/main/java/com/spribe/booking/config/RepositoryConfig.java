@@ -14,12 +14,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
+import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 import java.util.List;
 
 @Configuration
 @EnableR2dbcRepositories
+@EnableR2dbcAuditing
 public class RepositoryConfig extends AbstractR2dbcConfiguration {
 
     @Value("${spring.r2dbc.host:localhost}")
