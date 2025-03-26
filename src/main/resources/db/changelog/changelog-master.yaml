@@ -1,13 +1,22 @@
 databaseChangeLog:
   - include:
-      file: changes/001-enums.sql
+      file: changes/001-initial-enums.sql
       relativeToChangelogFile: true
   - include:
       file: changes/002-initial-schema.sql
       relativeToChangelogFile: true
   - include:
-      file: changes/003-indexes.sql
+      file: changes/003-initial-indexes.sql
       relativeToChangelogFile: true
   - include:
-      file: changes/004-test-data.sql
+      file: changes/004-initial-test-data.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-20-01-update-units-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-20-02-update-payments-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-20-03-update-events-table.sql
       relativeToChangelogFile: true

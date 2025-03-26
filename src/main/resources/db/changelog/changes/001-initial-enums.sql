@@ -14,10 +14,10 @@ CREATE TYPE booking_status AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED');
 
 --preconditions onFail:MARK_RAN
 --precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM pg_type WHERE typname = 'payment_status'
-CREATE TYPE payment_status AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'EXPIRED');
+CREATE TYPE payment_status AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'CANCELED', 'EXPIRED');
 --rollback DROP TYPE IF EXISTS payment_status;
 
 --preconditions onFail:MARK_RAN
 --precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM pg_type WHERE typname = 'event_type'
-CREATE TYPE event_type AS ENUM ('CREATED', 'UPDATED', 'DELETED', 'BOOKED', 'CANCELLED');
+CREATE TYPE event_type AS ENUM ('CREATED', 'UPDATED');
 --rollback DROP TYPE IF EXISTS event_type;
