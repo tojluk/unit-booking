@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -27,14 +25,19 @@ public class CacheService {
     private final UnitRepository unitRepository;
     private final ReactiveRedisTemplate<String, Long> redisTemplate;
 
-    @Cacheable(cacheNames = CACHE_NAME, key = "'available_units_count'")
     public Mono<Long> getAvailableUnitsCount() {
-        return unitRepository.countByIsAvailable(true)
-                             .doOnSuccess(count ->
-                                                  log.debug("Fetched available units count from DB: {}", count));
+        return redisTemplate.opsForValue()
+                            .get(AVAILABLE_UNITS_KEY)
+                            .switchIfEmpty(
+                                    unitRepository.countByIsAvailable(true)
+                                                  .flatMap(count ->
+                                                                   redisTemplate.opsForValue().set(AVAILABLE_UNITS_KEY, count, Duration.ofHours(1))
+                                                                                .thenReturn(count))
+                            )
+                            .doOnSuccess(count ->
+                                                 log.debug("Retrieved available units count from cache: {}", count));
     }
 
-    @CachePut(cacheNames = CACHE_NAME, key = "'available_units_count'")
     public Mono<Long> incrementAvailableUnits() {
         return redisTemplate.opsForValue()
                             .increment(AVAILABLE_UNITS_KEY)
@@ -42,7 +45,6 @@ public class CacheService {
                                                  log.debug("Incremented available units count in cache: {}", count));
     }
 
-    @CachePut(cacheNames = CACHE_NAME, key = "'available_units_count'")
     public Mono<Long> decrementAvailableUnits() {
         return redisTemplate.opsForValue()
                             .decrement(AVAILABLE_UNITS_KEY)

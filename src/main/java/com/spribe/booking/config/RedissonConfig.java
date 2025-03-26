@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Configuration;
 public class RedissonConfig {
     @Bean
     public RedissonClient redissonClient(
-            @Value("${spring.redis.host}") String host,
-            @Value("${spring.redis.port}") int port) {
+            @Value("${spring.data.redis.host}") String host,
+            @Value("${spring.data.redis.port}") int port) {
         Config config = new Config();
         config.useSingleServer()
-              .setAddress("redis://" + host + ":" + port);
+             .setAddress("redis://" + host + ":" + port);
         return Redisson.create(config);
     }
 }

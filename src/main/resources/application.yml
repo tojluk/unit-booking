@@ -29,7 +29,7 @@ spring:
     show-sql: true
   data:
     redis:
-      host: localhost
+      host: 127.0.0.1
       port: 6379
       timeout: 10000ms
       lettuce:
@@ -42,6 +42,12 @@ logging:
   level:
     liquibase: DEBUG
     org.springframework: DEBUG
+    io.r2dbc.postgresql.QUERY: TRACE
+    io.r2dbc.postgresql.PARAM: TRACE
+    org.springframework.r2dbc: TRACE
+    io.r2dbc.postgresql.client.ReactorNettyClient: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+    com.spribe.booking: DEBUG
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

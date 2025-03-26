@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset mak.dz:1 dbms:postgresql context:initial-schema
+--changeset mak.dzehtsiarou:1 dbms:postgresql context:initial-schema
 CREATE SEQUENCE IF NOT EXISTS units_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS users_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE IF NOT EXISTS bookings_seq START WITH 1 INCREMENT BY 1;
@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS units (
     floor INTEGER NOT NULL,
     base_cost DECIMAL(10,2) NOT NULL,
     description TEXT,
+    is_available BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT rooms_number_positive CHECK (rooms_number > 0),

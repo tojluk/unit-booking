@@ -17,6 +17,3 @@ databaseChangeLog:
   - include:
       file: changes/2024-03-20-02-update-payments-table.sql
       relativeToChangelogFile: true
-  - include:
-      file: changes/2024-03-20-03-update-events-table.sql
-      relativeToChangelogFile: true

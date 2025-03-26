@@ -29,6 +29,8 @@ public class Unit {
     private BigDecimal baseCost;
     private BigDecimal markupPercentage;
     private String description;
+    //TODO: switch to range of booking dates
+    private boolean isAvailable;
 
     @CreatedDate
     private LocalDateTime createdAt;

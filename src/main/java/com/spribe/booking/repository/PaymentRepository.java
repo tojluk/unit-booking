@@ -17,6 +17,6 @@ import java.time.LocalDateTime;
 public interface PaymentRepository extends ReactiveCrudRepository<Payment, Long> {
     Flux<Payment> findByStatus(PaymentStatus status);
     Flux<Payment> findByBookingId(Long bookingId);
-    Flux<Payment> findByExpirationTimeLessThanAndStatus(LocalDateTime time, PaymentStatus status);
+    Flux<Payment> findByExpirationDateLessThanAndStatus(LocalDateTime time, PaymentStatus status);
     Mono<Payment> findFirstByBookingIdOrderByCreatedAtDesc(Long bookingId);
 }

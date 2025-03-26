@@ -18,14 +18,14 @@ public class PaymentController {
     @PostMapping("/{paymentId}/process")
     @Operation(summary = "Emulate payment")
     public Mono<PaymentResponse> processPayment(@PathVariable Long paymentId) {
-        return paymentService.processPayment(paymentId)
+        return paymentService.completePaymentAndBooking(paymentId)
                              .map(payment -> new PaymentResponse(
                                      payment.getId(),
                                      payment.getBookingId(),
                                      payment.getAmount(),
                                      payment.getStatus(),
                                      payment.getPaymentDate(),
-                                     payment.getExpirationTime(),
+                                     payment.getExpirationDate(),
                                      payment.getCreatedAt()
                              ));
     }

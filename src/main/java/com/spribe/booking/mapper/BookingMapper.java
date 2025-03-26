@@ -8,7 +8,6 @@ import com.spribe.booking.model.types.BookingStatus;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -25,7 +24,6 @@ public class BookingMapper {
         booking.setEndDate(request.endDate());
         booking.setStatus(BookingStatus.PENDING);
         booking.setTotalCost(calculateTotalCost(unit, request));
-        booking.setCreatedAt(LocalDateTime.now());
         return booking;
     }
 

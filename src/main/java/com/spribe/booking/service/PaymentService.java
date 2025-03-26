@@ -36,13 +36,13 @@ public class PaymentService {
         payment.setBookingId(booking.getId());
         payment.setAmount(booking.getTotalCost());
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setExpirationTime(LocalDateTime.now().plusMinutes(PAYMENT_EXPIRATION_MINUTES));
+        payment.setExpirationDate(LocalDateTime.now().plusMinutes(PAYMENT_EXPIRATION_MINUTES));
         payment.setCreatedAt(LocalDateTime.now());
 
         return paymentRepository.save(payment);
     }
 
-    public Mono<Payment> processPayment(Long paymentId) {
+    public Mono<Payment> completePaymentAndBooking(Long paymentId) {
         String lockKey = "payment:" + paymentId;
         RLock lock = redissonClient.getLock(lockKey);
         return Mono.fromCompletionStage(lock.tryLockAsync(5, 10, TimeUnit.SECONDS))
@@ -52,7 +52,7 @@ public class PaymentService {
                                     if (payment.getStatus() != PaymentStatus.PENDING) {
                                         return getMonoError(PAYMENT_IS_NOT_IN_PENDING_STATE);
                                     }
-                                    if (LocalDateTime.now().isAfter(payment.getExpirationTime())) {
+                                    if (LocalDateTime.now().isAfter(payment.getExpirationDate())) {
                                         return markPaymentAsExpired(payment);
                                     }
 
@@ -66,13 +66,32 @@ public class PaymentService {
                                 })).doFinally(signal -> lock.unlock());
     }
 
+    public Mono<Payment> cancelPayment(Long paymentId) {
+        String lockKey = "payment:" + paymentId;
+        RLock lock = redissonClient.getLock(lockKey);
+        return Mono.fromCompletionStage(lock.tryLockAsync(5, 10, TimeUnit.SECONDS))
+                   .filter(Boolean::booleanValue)
+                   .flatMap(unused ->  paymentRepository.findById(paymentId)
+                                                        .flatMap(payment -> {
+                                                            if (payment.getStatus() != PaymentStatus.PENDING) {
+                                                                return getMonoError(PAYMENT_IS_NOT_IN_PENDING_STATE);
+                                                            }
+                                                            if (LocalDateTime.now().isAfter(payment.getExpirationDate())) {
+                                                                return markPaymentAsExpired(payment);
+                                                            }
+                                                            payment.setStatus(PaymentStatus.CANCELLED);
+                                                            payment.setPaymentDate(LocalDateTime.now());
+                                                            return paymentRepository.save(payment);
+                                                        })).doFinally(signal -> lock.unlock());
+    }
+
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
     public void checkExpiredPayments() {
         String lockKey = "payment_processing_lock";
         RLock lock = redissonClient.getLock(lockKey);
         Mono.fromCompletionStage(lock.tryLockAsync(5, 10, TimeUnit.SECONDS))
             .filter(Boolean::booleanValue)
-            .flatMapMany(unused -> paymentRepository.findByExpirationTimeLessThanAndStatus(
+            .flatMapMany(unused -> paymentRepository.findByExpirationDateLessThanAndStatus(
                     LocalDateTime.now(),
                     PaymentStatus.PENDING
             ))

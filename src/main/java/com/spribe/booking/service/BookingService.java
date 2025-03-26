@@ -32,6 +32,7 @@ public class BookingService {
     private final PaymentService paymentService;
     private final CacheService cacheService;
     private final RedissonClient redissonClient;
+    private final UnitService unitService;
 
     public Mono<BookingResponse> createBooking(BookingRequest request) {
         String lockKey = "unit:" + request.unitId();
@@ -44,8 +45,8 @@ public class BookingService {
                                Booking booking = mapBookingRequestFromUnit(request, unit);
 
                                return bookingRepository.save(booking)
-                                                       .flatMap(savedBooking -> paymentService.createPayment(
-                                                                                                      savedBooking)
+                                                       .flatMap(savedBooking -> paymentService.createPayment(savedBooking)
+                                                                                              .then(unitService.setUnitAvailability(unit.getId(), false))
                                                                                               .then(cacheService.decrementAvailableUnits())
                                                                                               .thenReturn(savedBooking))
                                                        .map(BookingMapper::mapToBookingResponseFromBooking);
@@ -66,9 +67,11 @@ public class BookingService {
                                                                return getMonoError(BOOKING_IS_ALREADY_CANCELLED);
                                                            }
                                                            booking.setStatus(BookingStatus.CANCELLED);
-
-                                                           return bookingRepository.save(booking)
-                                                                                   .map(BookingMapper::mapToBookingResponseFromBooking);
+                                                           return unitService.setUnitAvailability(booking.getUnitId(), true)
+                                                                      .then(paymentService.cancelPayment(booking.getId()))
+                                                                      .then(cacheService.incrementAvailableUnits())
+                                                                      .then(bookingRepository.save(booking))
+                                                                      .map(BookingMapper::mapToBookingResponseFromBooking);
                                                        })).doFinally(signal -> lock.unlock());
     }
 
@@ -82,7 +85,7 @@ public class BookingService {
                                                                )
                                                                .hasElements()
                                                                .flatMap(hasOverlapping -> {
-                                                                   if (hasOverlapping) {
+                                                                   if (Boolean.TRUE.equals(hasOverlapping)) {
                                                                        return getMonoError(UNIT_IS_ALREADY_BOOKED_FOR_THESE_DATES);
                                                                    }
                                                                    return Mono.just(unit);

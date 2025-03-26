@@ -37,4 +37,5 @@ public interface BookingRepository extends ReactiveCrudRepository<Booking, Long>
             LocalDate startDate,
             LocalDate endDate
     );
+
 }
