@@ -101,5 +101,4 @@ public class RepositoryConfig extends AbstractR2dbcConfiguration {
         }
     }
 
-
 }

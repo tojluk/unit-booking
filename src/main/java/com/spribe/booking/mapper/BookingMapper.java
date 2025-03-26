@@ -35,8 +35,7 @@ public class BookingMapper {
                 booking.getStartDate(),
                 booking.getEndDate(),
                 booking.getStatus(),
-                booking.getTotalCost(),
-                booking.getCreatedAt()
+                booking.getTotalCost()
         );
     }
 

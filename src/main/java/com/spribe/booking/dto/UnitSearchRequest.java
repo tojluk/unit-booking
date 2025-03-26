@@ -18,7 +18,7 @@ public record UnitSearchRequest(
 ) {
     public UnitSearchRequest {
         if (onlyAvailable == null) onlyAvailable = true;
-        if (page < 0) page = 0;
+        if (page < 0) page = 1;
         if (size <= 0) size = 20;
     }
 }
