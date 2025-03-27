@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ public class BookingService {
     private final CacheService cacheService;
     private final RedissonClient redissonClient;
     private final UnitService unitService;
+    private final TransactionalOperator transactionalOperator;
 
     public Mono<BookingResponse> createBooking(BookingRequest request) {
         String lockKey = "unit:" + request.unitId();
@@ -52,6 +54,7 @@ public class BookingService {
                                                        .map(BookingMapper::mapToBookingResponseFromBooking);
                            })
                    )
+                   .as(transactionalOperator::transactional)
                    .doFinally(signal -> lock.unlockAsync());
     }
 
@@ -72,7 +75,9 @@ public class BookingService {
                                                                       .then(cacheService.incrementAvailableUnits())
                                                                       .then(bookingRepository.save(booking))
                                                                       .map(BookingMapper::mapToBookingResponseFromBooking);
-                                                       })).doFinally(signal -> lock.unlock());
+                                                       }))
+                   .as(transactionalOperator::transactional)
+                   .doFinally(signal -> lock.unlock());
     }
 
     private Mono<Unit> checkUnitAvailability(BookingRequest request) {
