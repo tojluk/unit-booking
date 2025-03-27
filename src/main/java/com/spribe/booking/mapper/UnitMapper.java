@@ -32,7 +32,7 @@ public class UnitMapper {
                 unit.getFloor(),
                 unit.getBaseCost(),
                 unit.calculateTotalCost(),
-                //TODO: flag must be set by Booking wit rage of periods
+                //TODO: flag must be set by Booking with range of periods
                 unit.isAvailable(),
                 unit.getDescription()
         );

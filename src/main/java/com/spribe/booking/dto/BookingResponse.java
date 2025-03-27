@@ -4,7 +4,6 @@ import com.spribe.booking.model.types.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public record BookingResponse(Long id,
         Long unitId,
@@ -12,6 +11,5 @@ public record BookingResponse(Long id,
         LocalDate startDate,
         LocalDate endDate,
         BookingStatus status,
-        BigDecimal totalCost,
-        LocalDateTime createdAt) {
+        BigDecimal totalCost) {
 }

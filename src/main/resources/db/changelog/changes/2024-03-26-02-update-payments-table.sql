@@ -1,4 +1,4 @@
--- 2024-03-20-02-update-payments-table.sql
+-- 2024-03-26-02-update-payments-table.sql
 --liquibase formatted sql
 
 --changeset mak.dz:1

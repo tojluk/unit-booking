@@ -12,8 +12,17 @@ databaseChangeLog:
       file: changes/004-initial-test-data.sql
       relativeToChangelogFile: true
   - include:
-      file: changes/2024-03-20-01-update-units-table.sql
+      file: changes/2024-03-26-01-update-units-table.sql
       relativeToChangelogFile: true
   - include:
-      file: changes/2024-03-20-02-update-payments-table.sql
+      file: changes/2024-03-26-02-update-payments-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-27-01-sp_search_units.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-27-02-add_random_units.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/2024-03-27-03-sp_search_improove.sql
       relativeToChangelogFile: true

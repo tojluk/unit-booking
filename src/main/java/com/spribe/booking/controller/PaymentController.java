@@ -25,8 +25,7 @@ public class PaymentController {
                                      payment.getAmount(),
                                      payment.getStatus(),
                                      payment.getPaymentDate(),
-                                     payment.getExpirationDate(),
-                                     payment.getCreatedAt()
+                                     payment.getExpirationDate()
                              ));
     }
 }
