@@ -26,9 +26,9 @@ public class CacheController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Cache evict")
-    public Mono<Void> clearCache() {
-        return cacheService.clearCache();
+    @Operation(summary = "Cache validation")
+    public Mono<Void> validateCache() {
+        return cacheService.validateCache();
     }
 
 }

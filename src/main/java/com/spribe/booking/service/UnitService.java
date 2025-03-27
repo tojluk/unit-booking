@@ -3,6 +3,7 @@ package com.spribe.booking.service;
 import com.spribe.booking.dto.UnitCreateRequest;
 import com.spribe.booking.dto.UnitResponse;
 import com.spribe.booking.dto.UnitSearchRequest;
+import com.spribe.booking.dto.UnitSearchResponse;
 import com.spribe.booking.mapper.UnitMapper;
 import com.spribe.booking.model.Unit;
 import com.spribe.booking.repository.UnitRepository;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.spribe.booking.mapper.UnitMapper.mapUnitFromUnitCreateRequest;
+import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +33,17 @@ public class UnitService {
                              .map(UnitMapper::mapUnitToUnitResponse);
     }
 
-    //TODO: add pagination
-    public Flux<UnitResponse> searchUnits(UnitSearchRequest request) {
-          return unitRepository.findAll()
-                             .skip((long) request.page() * request.size())
-                             .take(request.size())
-                             .map(UnitMapper::mapUnitToUnitResponse);
+    public Flux<UnitSearchResponse> searchUnits(UnitSearchRequest request) {
+        return unitRepository.searchUnits(request.startDate(),
+                                          request.endDate(),
+                                          request.userId(),
+                                          request.roomsNumber(),
+                                          isNull(request.accommodationType()) ? null : request.accommodationType().name(),
+                                          request.floor(),
+                                          request.sortBy().name(),
+                                          request.sortDirection().name(),
+                                          request.pageNo(),
+                                          request.pageSize());
     }
 
 

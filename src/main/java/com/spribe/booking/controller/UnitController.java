@@ -3,6 +3,7 @@ package com.spribe.booking.controller;
 import com.spribe.booking.dto.UnitCreateRequest;
 import com.spribe.booking.dto.UnitResponse;
 import com.spribe.booking.dto.UnitSearchRequest;
+import com.spribe.booking.dto.UnitSearchResponse;
 import com.spribe.booking.service.UnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,7 @@ public class UnitController {
 
     @PostMapping("/search")
     @Operation(summary = "Search Units by criteria")
-    public Flux<UnitResponse> searchUnits(@RequestBody UnitSearchRequest request) {
+    public Flux<UnitSearchResponse> searchUnits(@RequestBody UnitSearchRequest request) {
         return unitService.searchUnits(request);
     }
 }
