@@ -20,9 +20,39 @@ databaseChangeLog:
   - include:
       file: changes/2024-03-27-01-sp_search_units.sql
       relativeToChangelogFile: true
-  - include:
-      file: changes/2024-03-27-02-add_random_units.sql
-      relativeToChangelogFile: true
+#  - include:
+#      file: changes/2024-03-27-02-add_random_units.sql
+#      relativeToChangelogFile: true
   - include:
       file: changes/2024-03-27-03-sp_search_improove.sql
       relativeToChangelogFile: true
+  # Always run random units generation
+  - changeSet:
+      id: random-units-data
+      author: system
+      runAlways: true
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO units (rooms_number, accommodation_type, floor, base_cost, description, is_available)
+              SELECT floor(random() * 5) + 1 AS rooms_number,
+                    (ARRAY ['HOME'::accommodation_type,
+                        'FLAT'::accommodation_type,
+                        'APARTMENTS'::accommodation_type])[floor(random() * 3) + 1] AS accommodation_type,
+                    floor(random() * 20) + 1 AS floor,
+                    (floor(random() * 900) + 100)::decimal AS base_cost,
+                    'Modern apartment with ' ||
+                    (ARRAY ['park',
+                        'sea',
+                        'city',
+                        'mountain',
+                        'garden'])[floor(random() * 5) + 1] ||
+                    ' view. ' ||
+                    (ARRAY ['Fully furnished',
+                        'Recently renovated',
+                        'Modern design',
+                        'Spacious',
+                        'Luxury'])[floor(random() * 5) + 1] ||
+                    ' with household appliances.' AS description,
+                    TRUE AS is_available
+              FROM generate_series(1, 90)

@@ -12,6 +12,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import static com.spribe.booking.exception.ExceptionsUtils.getMonoError;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
+    //TODO: get from properties
     private static final long PAYMENT_EXPIRATION_MINUTES = 15;
     private static final String PAYMENT_IS_NOT_IN_PENDING_STATE = "Payment is not in PENDING state";
 
@@ -30,6 +32,7 @@ public class PaymentService {
     private final BookingRepository bookingRepository;
     private final CacheService cacheService;
     private final RedissonClient redissonClient;
+    private final TransactionalOperator transactionalOperator;
 
     public Mono<Payment> createPayment(Booking booking) {
         Payment payment = new Payment();
@@ -63,7 +66,9 @@ public class PaymentService {
                                                             .flatMap(savedPayment ->
                                                                              updateBookingStatus(savedPayment.getBookingId(), BookingStatus.CONFIRMED)
                                                                                      .then(Mono.just(savedPayment)));
-                                })).doFinally(signal -> lock.unlock());
+                                }))
+            .as(transactionalOperator::transactional)
+            .doFinally(signal -> lock.unlock());
     }
 
     public Mono<Payment> cancelPayment(Long paymentId) {
@@ -82,7 +87,9 @@ public class PaymentService {
                                                             payment.setStatus(PaymentStatus.CANCELLED);
                                                             payment.setPaymentDate(LocalDateTime.now());
                                                             return paymentRepository.save(payment);
-                                                        })).doFinally(signal -> lock.unlock());
+                                                        }))
+                   .as(transactionalOperator::transactional)
+                   .doFinally(signal -> lock.unlock());
     }
 
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)

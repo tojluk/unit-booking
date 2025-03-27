@@ -40,7 +40,7 @@ public class BookingMapper {
     }
 
     private static BigDecimal calculateTotalCost(Unit unit, BookingRequest request) {
-        long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate());
+        long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1;
         return unit.calculateTotalCost().multiply(BigDecimal.valueOf(days));
     }
 

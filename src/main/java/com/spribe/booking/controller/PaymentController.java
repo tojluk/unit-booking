@@ -11,8 +11,9 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
-@Tag(name = "Payments", description = "API для работы с платежами")
+@Tag(name = "Payments", description = "API for payments processing")
 public class PaymentController {
+
     private final PaymentService paymentService;
 
     @PostMapping("/{paymentId}/process")

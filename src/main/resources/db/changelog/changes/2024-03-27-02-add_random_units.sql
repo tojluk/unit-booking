@@ -1,7 +1,7 @@
 -- 2024-03-27-02-add_random_units.sql
 --liquibase formatted sql
 
---changeset mak.dz:1
+--changeset mak.dz:always-random-units runAlways:true
 --preconditions onFail:MARK_RAN
 INSERT INTO units (rooms_number, accommodation_type, floor, base_cost, description, is_available)
 SELECT floor(random() * 5) + 1                                             AS rooms_number,
