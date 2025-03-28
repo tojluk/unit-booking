@@ -14,7 +14,12 @@ import reactor.core.publisher.Mono;
 
 import static com.spribe.booking.mapper.UnitMapper.mapUnitFromUnitCreateRequest;
 import static java.util.Objects.isNull;
-
+/**
+ * Service class for managing units.
+ * <p>
+ * This class provides methods to create, search, and update unit availability.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class UnitService {
@@ -22,6 +27,12 @@ public class UnitService {
     private final UnitRepository unitRepository;
     private final CacheService cacheService;
 
+    /**
+     * Creates a new unit.
+     *
+     * @param request {@link UnitCreateRequest} The request containing unit details.
+     * @return A Mono containing the created unit response.
+     */
     public Mono<UnitResponse> createUnit(UnitCreateRequest request) {
         Unit unit = mapUnitFromUnitCreateRequest(request);
 
@@ -33,6 +44,12 @@ public class UnitService {
                              .map(UnitMapper::mapUnitToUnitResponse);
     }
 
+    /**
+     * Searches for units based on various criteria.
+     *
+     * @param request {@link UnitSearchRequest} The request containing search criteria.
+     * @return A Flux of UnitSearchResponse containing the search results.
+     */
     public Flux<UnitSearchResponse> searchUnits(UnitSearchRequest request) {
         return unitRepository.searchUnits(request.startDate(),
                                           request.endDate(),
@@ -46,11 +63,17 @@ public class UnitService {
                                           request.pageSize());
     }
 
-
+    /**
+     * Updates the availability of a unit.
+     *
+     * @param id          {@link Long} The ID of the unit to update.
+     * @param isAvailable {@link boolean} The new availability status.
+     * @return A Mono containing the updated unit response.
+     */
     public Mono<UnitResponse> setUnitAvailability(Long id, boolean isAvailable) {
         return unitRepository.findById(id)
                              .flatMap(existingUnit -> {
-                                            existingUnit.setAvailable(isAvailable);
+                                          existingUnit.setAvailable(isAvailable);
                                           return unitRepository.save(existingUnit);
                                       }
                              )

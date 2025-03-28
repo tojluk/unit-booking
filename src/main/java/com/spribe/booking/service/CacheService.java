@@ -11,7 +11,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-
+/**
+ * CacheService is responsible for managing the cache of available units.
+ * It provides methods to get, increment, and decrement the count of available units.
+ * The cache is initialized on application startup and validated periodically.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,12 @@ public class CacheService {
     private final UnitRepository unitRepository;
     private final ReactiveRedisTemplate<String, Long> redisTemplate;
 
+    /**
+     * Retrieves the count of available units from the cache.
+     * If the count is not present in the cache, it fetches it from the database and updates the cache.
+     *
+     * @return A Mono containing the count of available units.
+     */
     public Mono<Long> getAvailableUnitsCount() {
         return redisTemplate.opsForValue()
                             .get(AVAILABLE_UNITS_KEY)
@@ -37,6 +47,11 @@ public class CacheService {
                                                  log.debug("Retrieved available units count from cache: {}", count));
     }
 
+    /**
+     * Increments the count of available units in the cache.
+     *
+     * @return A Mono containing the new count of available units.
+     */
     public Mono<Long> incrementAvailableUnits() {
         return redisTemplate.opsForValue()
                             .increment(AVAILABLE_UNITS_KEY)
@@ -44,6 +59,11 @@ public class CacheService {
                                                  log.debug("Incremented available units count in cache: {}", count));
     }
 
+    /**
+     * Decrements the count of available units in the cache.
+     *
+     * @return A Mono containing the new count of available units.
+     */
     public Mono<Long> decrementAvailableUnits() {
         return redisTemplate.opsForValue()
                             .decrement(AVAILABLE_UNITS_KEY)
@@ -51,6 +71,12 @@ public class CacheService {
                                                  log.debug("Decremented available units count in cache: {}", count));
     }
 
+    /**
+     * Initializes the cache on application startup.
+     * It validates the cache and updates it if necessary.
+     *
+     * @return A CommandLineRunner that initializes the cache.
+     */
     @Bean
     @Order(1)
     public CommandLineRunner initializeCacheOnStartup() {
@@ -63,6 +89,12 @@ public class CacheService {
         };
     }
 
+    /**
+     * Validates the cache by comparing the cached count of available units with the actual count from the database.
+     * If they differ, it updates the cache with the actual count.
+     *
+     * @return A Mono that completes when the validation is done.
+     */
     public Mono<Void> validateCache() {
         return Mono.zip(unitRepository.countByIsAvailable(true),
                         redisTemplate.opsForValue()

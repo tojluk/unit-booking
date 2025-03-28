@@ -21,6 +21,9 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 
 import java.util.List;
 
+/**
+ * Repositories config
+ */
 @Configuration
 @EnableR2dbcRepositories
 @EnableR2dbcAuditing

@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-
+/**
+ * CacheController is a REST controller that handles cache-related operations.
+ * It provides an endpoint for retrieving the count of available units.
+ */
 @RestController
 @RequestMapping("/api/v1/cache")
 @RequiredArgsConstructor
-@Tag(name = "CachedData", description = "API controlling cached data")
+@Tag(name = "CachedData", description = "API controller cached data")
 public class CacheController {
 
     private final CacheService cacheService;

@@ -19,6 +19,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
+/**
+ * GlobalExceptionHandler is a custom exception handler for handling errors in a Spring WebFlux application.
+ * It extends AbstractErrorWebExceptionHandler to provide a centralized error handling mechanism.
+ */
 @Component
 public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 

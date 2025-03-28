@@ -1,8 +1,14 @@
 package com.spribe.booking.testfixture;
 
+import com.spribe.booking.dto.BookingCancellationRequest;
 import com.spribe.booking.dto.BookingRequest;
+import com.spribe.booking.dto.BookingResponse;
 import com.spribe.booking.dto.UnitCreateRequest;
 import com.spribe.booking.dto.UnitResponse;
+import com.spribe.booking.dto.UnitSearchRequest;
+import com.spribe.booking.dto.UnitSearchResponse;
+import com.spribe.booking.dto.types.SortDirection;
+import com.spribe.booking.dto.types.UnitSortField;
 import com.spribe.booking.model.Booking;
 import com.spribe.booking.model.Payment;
 import com.spribe.booking.model.Unit;
@@ -24,6 +30,9 @@ public class TestFixture {
     public static final Long USER_ID = 100L;
     public static final BigDecimal TOTAL_COST = new BigDecimal("690.00");
     public static final BigDecimal OVERLAPPING_TOTAL_COST = new BigDecimal("200.00");
+    public static final Long BOOKING_ID = 1000L;
+    public static final BigDecimal TTL_BOOKING_PRICE = new BigDecimal("230.0000");
+    public static final Long UNIT_ID = 1L;
 
     public static Unit.UnitBuilder createTestUnit() {
         return Unit.builder()
@@ -35,44 +44,57 @@ public class TestFixture {
                 .isAvailable(true);
     }
 
-    public static BookingRequest createBookingRequestForValidDates(Long unitId) {
-        return new BookingRequest(
-                unitId,
-                USER_ID,
-                START_DATE,
-                END_DATE
-        );
+    public static BookingRequest.BookingRequestBuilder createBookingRequestForValidDates() {
+        return BookingRequest.builder()
+                .unitId(UNIT_ID)
+                .userId(USER_ID)
+                .startDate(START_DATE)
+                .endDate(END_DATE);
     }
 
-    public static Booking createExpectedBooking(BookingStatus status, Long unitId) {
-        Booking booking = new Booking();
-        booking.setUnitId(unitId);
-        booking.setUserId(USER_ID);
-        booking.setStartDate(START_DATE);
-        booking.setEndDate(END_DATE);
-        booking.setStatus(status);
-        booking.setTotalCost(TOTAL_COST);
-        return booking;
+    public static BookingResponse.BookingResponseBuilder createBookingResponsePending() {
+        return BookingResponse.builder()
+                .id(BOOKING_ID)
+                .unitId(UNIT_ID)
+                .userId(USER_ID)
+                .startDate(START_DATE)
+                .endDate(END_DATE)
+                .status(BookingStatus.PENDING)
+                .totalCost(TTL_BOOKING_PRICE);
     }
 
-    public static Booking createOverlappingBooking(Long unitId) {
-        Booking booking = new Booking();
-        booking.setUnitId(unitId);
-        booking.setUserId(USER_ID);
-        booking.setStartDate(START_DATE.minusDays(2));
-        booking.setEndDate(START_DATE.plusDays(2));
-        booking.setStatus(BookingStatus.CONFIRMED);
-        booking.setTotalCost(OVERLAPPING_TOTAL_COST);
-        return booking;
+    public static BookingCancellationRequest.BookingCancellationRequestBuilder createBookingCancellationRequest() {
+        return BookingCancellationRequest.builder()
+                .bookingId(BOOKING_ID)
+                .paymentStatus(PaymentStatus.CANCELLED);
     }
 
-    public static Payment createExpectedPayment(Long bookingId) {
-        Payment payment = new Payment();
-        payment.setBookingId(bookingId);
-        payment.setAmount(TOTAL_COST);
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-        return payment;
+    public static Booking.BookingBuilder createExpectedBooking(Long unitId) {
+        return Booking.builder()
+                .unitId(unitId)
+                .userId(USER_ID)
+                .startDate(START_DATE)
+                .endDate(END_DATE)
+                .status(BookingStatus.PENDING)
+                .totalCost(TOTAL_COST);
+    }
+
+    public static Booking.BookingBuilder createOverlappingBooking() {
+        return Booking.builder()
+                .unitId(UNIT_ID)
+                .userId(USER_ID)
+                .startDate(START_DATE.minusDays(2))
+                .endDate(START_DATE.plusDays(2))
+                .status(BookingStatus.CONFIRMED)
+                .totalCost(OVERLAPPING_TOTAL_COST);
+    }
+
+    public static Payment.PaymentBuilder createExpectedPayment() {
+        return Payment.builder()
+                .bookingId(BOOKING_ID)
+                .amount(TOTAL_COST)
+                .status(PaymentStatus.PENDING)
+                .expirationDate(LocalDateTime.now().plusMinutes(15));
     }
 
     public static UnitCreateRequest.UnitCreateRequestBuilder createValidUnitRequest() {
@@ -92,5 +114,33 @@ public class TestFixture {
                 .baseCost(BASE_COST)
                 .totalCost(TTL_UNIT_COST)
                 .isAvailable(true);
+    }
+
+    public static UnitSearchRequest.UnitSearchRequestBuilder createUnitSearchRequest() {
+        return UnitSearchRequest.builder()
+                .startDate(START_DATE)
+                .endDate(END_DATE)
+                .userId(USER_ID)
+                .roomsNumber(2)
+                .accommodationType(AccommodationType.APARTMENTS)
+                .floor(1)
+                .sortBy(UnitSortField.COST)
+                .sortDirection(SortDirection.ASC)
+                .pageNo(0)
+                .pageSize(10);
+    }
+
+    public static UnitSearchResponse.UnitSearchResponseBuilder createUnitSearchResponse(Long id) {
+        return UnitSearchResponse.builder()
+                .id(id)
+                .description("Description for unit " + id)
+                .roomsNumber(2)
+                .floor(1)
+                .totalCount(1L)
+                .totalPages(1L)
+                .markupPercentage(PERCENTAGE)
+                .accommodationType(AccommodationType.APARTMENTS.name())
+                .baseCost(BASE_COST)
+                .isAvailableForUser(true);
     }
 }

@@ -8,6 +8,7 @@ import com.spribe.booking.model.types.BookingStatus;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -16,6 +17,13 @@ import java.time.temporal.ChronoUnit;
 @UtilityClass
 public class BookingMapper {
 
+    /**
+     * Maps a BookingRequest to a Booking entity.
+     *
+     * @param request {@link BookingRequest} The BookingRequest object containing booking details.
+     * @param unit {@link Unit}   The Unit object associated with the booking.
+     * @return A Booking entity populated with the details from the request and unit.
+     */
     public static Booking mapBookingRequestFromUnit(BookingRequest request, Unit unit) {
         Booking booking = new Booking();
         booking.setUnitId(unit.getId());
@@ -27,6 +35,12 @@ public class BookingMapper {
         return booking;
     }
 
+    /**
+     * Maps a Booking entity to a BookingResponse object.
+     *
+     * @param booking {@link Booking} The Booking entity to be mapped.
+     * @return A BookingResponse object populated with the details from the booking.
+     */
     public static BookingResponse mapToBookingResponseFromBooking(Booking booking) {
         return new BookingResponse(
                 booking.getId(),
@@ -41,7 +55,7 @@ public class BookingMapper {
 
     private static BigDecimal calculateTotalCost(Unit unit, BookingRequest request) {
         long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1;
-        return unit.calculateTotalCost().multiply(BigDecimal.valueOf(days));
+        return unit.calculateTotalCost().multiply(BigDecimal.valueOf(days)).setScale(2, RoundingMode.HALF_UP);
     }
 
 }

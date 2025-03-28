@@ -1,5 +1,6 @@
 package com.spribe.booking.controller;
 
+import com.spribe.booking.dto.BookingCancellationRequest;
 import com.spribe.booking.dto.BookingRequest;
 import com.spribe.booking.dto.BookingResponse;
 import com.spribe.booking.model.Booking;
@@ -20,6 +21,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static com.spribe.booking.testfixture.TestFixture.END_DATE;
 import static com.spribe.booking.testfixture.TestFixture.START_DATE;
 import static com.spribe.booking.testfixture.TestFixture.USER_ID;
+import static com.spribe.booking.testfixture.TestFixture.createBookingCancellationRequest;
 import static com.spribe.booking.testfixture.TestFixture.createBookingRequestForValidDates;
 import static com.spribe.booking.testfixture.TestFixture.createExpectedBooking;
 import static com.spribe.booking.testfixture.TestFixture.createExpectedPayment;
@@ -61,7 +63,7 @@ class BookingControllerIntegrationTest {
     @Test
     void shouldCreateBookingSuccessfully_whenCreateBooking_givenValidRequestAndNoOverlappingBooking() {
         // given
-        BookingRequest givenRequest = createBookingRequestForValidDates(unitId);
+        BookingRequest givenRequest = createBookingRequestForValidDates().unitId(unitId).build();
 
         // when
         BookingResponse response = webTestClient.post()
@@ -75,7 +77,7 @@ class BookingControllerIntegrationTest {
                                                 .getResponseBody();
 
         // then
-        Booking expectedBooking = createExpectedBooking(BookingStatus.PENDING, unitId);
+        Booking expectedBooking = createExpectedBooking(unitId).build();
 
         Booking savedBooking = bookingRepository.findById(response.id()).block();
         assertThat(savedBooking)
@@ -84,8 +86,9 @@ class BookingControllerIntegrationTest {
                 .isEqualTo(expectedBooking);
 
         Payment payment = paymentRepository.findByBookingId(savedBooking.getId())
-                .blockFirst();
-        Payment expectedPayment = createExpectedPayment(savedBooking.getId());
+                                           .blockFirst();
+        Payment expectedPayment = createExpectedPayment().bookingId(savedBooking.getId())
+                .build();
         assertThat(payment)
                 .usingRecursiveComparison()
                 .ignoringFields("id", "createdAt", "updatedAt", "expirationDate")
@@ -98,10 +101,10 @@ class BookingControllerIntegrationTest {
     @Test
     void shouldReturnConflict_whenCreateBooking_givenOverlappingBookingExists() {
         // given
-        Booking existingBooking = createOverlappingBooking(unitId);
+        Booking existingBooking = createOverlappingBooking().unitId(unitId).build();
         bookingRepository.save(existingBooking).block();
 
-        BookingRequest givenRequest = createBookingRequestForValidDates(unitId);
+        BookingRequest givenRequest = createBookingRequestForValidDates().unitId(unitId).build();
 
         // when-then
         webTestClient.post()
@@ -113,14 +116,20 @@ class BookingControllerIntegrationTest {
     }
 
     @Test
-    void shouldCancelBookingSuccessfully_whenCancelBooking_givenExistingBooking() {
+    void shouldCancelBookingSuccessfully_whenCancelBooking_givenExistingPendingBooking() {
         // given
-        Booking existingBooking = createExpectedBooking(BookingStatus.CONFIRMED, unitId);
+        Booking existingBooking = createExpectedBooking(unitId).status(BookingStatus.PENDING).build();
         Booking savedBooking = bookingRepository.save(existingBooking).block();
+
+        BookingCancellationRequest cancellationRequest = createBookingCancellationRequest()
+                .bookingId(savedBooking.getId())
+                .build();
 
         // when
         BookingResponse response = webTestClient.post()
-                                                .uri("/api/v1/bookings/" + savedBooking.getId() + "/cancel")
+                                                .uri("/api/v1/bookings/cancel")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .bodyValue(cancellationRequest)
                                                 .exchange()
                                                 .expectStatus().isOk()
                                                 .expectBody(BookingResponse.class)
@@ -128,7 +137,9 @@ class BookingControllerIntegrationTest {
                                                 .getResponseBody();
 
         // then
-        Booking expectedCancelledBooking = createExpectedBooking(BookingStatus.CANCELLED, unitId);
+        Booking expectedCancelledBooking = createExpectedBooking(unitId)
+                .id(savedBooking.getId())
+                .status(BookingStatus.CANCELLED).build();
 
         Booking updatedBooking = bookingRepository.findById(savedBooking.getId()).block();
         assertThat(updatedBooking)
