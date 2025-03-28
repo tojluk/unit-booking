@@ -1,4 +1,3 @@
-// Event.java
 package com.spribe.booking.model;
 
 import com.spribe.booking.model.types.EventType;
@@ -10,7 +9,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
-
+/**
+ * Represents an event in the booking system.
+ * <p>
+ * This class contains information about the event, including the entity type, entity ID,
+ * event type, description, and timestamp for creation.
+ * </p>
+ */
 @Getter
 @Setter
 @ToString

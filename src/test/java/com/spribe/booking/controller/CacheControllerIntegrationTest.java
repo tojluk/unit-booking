@@ -15,11 +15,8 @@ import reactor.test.StepVerifier;
 
 import static com.spribe.booking.testfixture.TestFixture.createTestUnit;
 import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CacheControllerIntegrationTest {
-
-    // TODO: use test fixture with predefined data; maybe use h2 + embedded-redis;
 
     @Autowired
     private WebTestClient webTestClient;

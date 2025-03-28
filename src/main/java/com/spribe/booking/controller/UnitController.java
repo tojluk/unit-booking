@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+/**
+ * UnitController is a REST controller that handles unit-related operations.
+ * It provides endpoints for creating and searching units.
+ */
 @RestController
 @RequestMapping("/api/v1/units")
 @RequiredArgsConstructor
-@Tag(name = "Units", description = "API controlling Units")
+@Tag(name = "Units", description = "API controller for Units")
 public class UnitController {
 
     private final UnitService unitService;

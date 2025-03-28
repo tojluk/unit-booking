@@ -6,7 +6,7 @@
 CREATE OR REPLACE FUNCTION search_units(
     p_start_date DATE,
     p_end_date DATE,
-    p_user_id INTEGER,
+    p_user_id BIGINT,
 
     p_rooms_number INTEGER DEFAULT NULL,
     p_accommodation_type VARCHAR DEFAULT NULL,

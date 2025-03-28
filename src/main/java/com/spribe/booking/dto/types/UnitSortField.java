@@ -1,5 +1,11 @@
 package com.spribe.booking.dto.types;
 
+import lombok.Getter;
+
+/**
+ * Enum representing the fields by which units can be sorted.
+ */
+@Getter
 public enum UnitSortField {
     ID("id"),
     NAME("name"),
@@ -14,7 +20,4 @@ public enum UnitSortField {
         this.fieldName = fieldName;
     }
 
-    public String getFieldName() {
-        return fieldName;
-    }
 }
