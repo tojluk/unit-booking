@@ -66,7 +66,7 @@ public class TestFixture {
     public static BookingCancellationRequest.BookingCancellationRequestBuilder createBookingCancellationRequest() {
         return BookingCancellationRequest.builder()
                 .bookingId(BOOKING_ID)
-                .paymentStatus(PaymentStatus.CANCELLED);
+                .paymentStatus(PaymentStatus.CANCELED);
     }
 
     public static Booking.BookingBuilder createExpectedBooking(Long unitId) {

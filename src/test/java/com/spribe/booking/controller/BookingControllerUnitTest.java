@@ -19,7 +19,6 @@ import static com.spribe.booking.testfixture.TestFixture.createBookingResponsePe
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-//TODO
 @ExtendWith(MockitoExtension.class)
 class BookingControllerUnitTest {
 

@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Schema(description = "Booking cancellation Request")
 @Builder
-public record BookingCancellationRequest(
+public record BookingCancellationRequest (
         @Schema(description = "Booking ID", example = "1")
         Long bookingId,
         @Schema(description = "Payment status", example = "CANCELLED")

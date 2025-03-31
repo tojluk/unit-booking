@@ -1,5 +1,6 @@
 package com.spribe.booking.controller;
 
+import com.spribe.booking.component.PaymentEventsHandler;
 import com.spribe.booking.dto.BookingCancellationRequest;
 import com.spribe.booking.dto.BookingRequest;
 import com.spribe.booking.dto.BookingResponse;
@@ -7,9 +8,11 @@ import com.spribe.booking.model.Booking;
 import com.spribe.booking.model.Payment;
 import com.spribe.booking.model.Unit;
 import com.spribe.booking.model.types.BookingStatus;
+import com.spribe.booking.model.types.PaymentStatus;
 import com.spribe.booking.repository.BookingRepository;
 import com.spribe.booking.repository.PaymentRepository;
 import com.spribe.booking.repository.UnitRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
@@ -50,6 +53,18 @@ class BookingControllerIntegrationTest {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private PaymentEventsHandler paymentEventsHandler;
+
+    @AfterEach
+    void tearDown() {
+        paymentEventsHandler.cancelAllScheduledTasks();
+        paymentRepository.deleteAll().block();
+        bookingRepository.deleteAll().block();
+        unitRepository.deleteAll().block();
+        redissonClient.getKeys().flushall();
+    }
+
     private Long unitId;
     @BeforeEach
     void setUp() {
@@ -85,8 +100,7 @@ class BookingControllerIntegrationTest {
                 .ignoringFields("id", "createdAt", "updatedAt")
                 .isEqualTo(expectedBooking);
 
-        Payment payment = paymentRepository.findByBookingId(savedBooking.getId())
-                                           .blockFirst();
+        Payment payment = paymentRepository.findByBookingId(savedBooking.getId()).block();
         Payment expectedPayment = createExpectedPayment().bookingId(savedBooking.getId())
                 .build();
         assertThat(payment)
@@ -120,6 +134,11 @@ class BookingControllerIntegrationTest {
         // given
         Booking existingBooking = createExpectedBooking(unitId).status(BookingStatus.PENDING).build();
         Booking savedBooking = bookingRepository.save(existingBooking).block();
+        Payment payment = createExpectedPayment()
+                .bookingId(savedBooking.getId())
+                .status(PaymentStatus.PENDING)
+                .build();
+        paymentRepository.save(payment).block();
 
         BookingCancellationRequest cancellationRequest = createBookingCancellationRequest()
                 .bookingId(savedBooking.getId())
@@ -139,7 +158,8 @@ class BookingControllerIntegrationTest {
         // then
         Booking expectedCancelledBooking = createExpectedBooking(unitId)
                 .id(savedBooking.getId())
-                .status(BookingStatus.CANCELLED).build();
+                .status(BookingStatus.CANCELLED)
+                .build();
 
         Booking updatedBooking = bookingRepository.findById(savedBooking.getId()).block();
         assertThat(updatedBooking)
