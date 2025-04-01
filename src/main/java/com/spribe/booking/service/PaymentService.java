@@ -41,12 +41,12 @@ public class PaymentService {
     /**
      * Update a payment
      *
-     * @param paymentId {@link Long} The ID of the payment to be cancelled.
-     * @param status {@link PaymentStatus} The status to set for the cancelled payment.
+     * @param bookingId {@link Long} The ID of the booking which is cancelling.
+     * @param status    {@link PaymentStatus} The status to set for the cancelled payment.
      * @return A Mono containing the cancelled payment.
      */
-    public Mono<Payment> updatePayment(Long paymentId, PaymentStatus status) {
-        return paymentRepository.findById(paymentId)
+    public Mono<Payment> updatePaymentByBookingId(Long bookingId, PaymentStatus status) {
+        return paymentRepository.findByBookingId(bookingId)
                                 .flatMap(payment -> {
                                     if (payment.getStatus() != PaymentStatus.PENDING) {
                                         return getMonoError(PAYMENT_IS_NOT_IN_PENDING_STATE);
@@ -56,5 +56,6 @@ public class PaymentService {
                                     return paymentRepository.save(payment);
                                 });
     }
+
 
 }

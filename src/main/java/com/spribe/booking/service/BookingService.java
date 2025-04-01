@@ -1,5 +1,7 @@
 package com.spribe.booking.service;
 
+import com.spribe.booking.component.event.BookingCancelledEvent;
+import com.spribe.booking.component.event.BookingCreatedEvent;
 import com.spribe.booking.dto.BookingCancellationRequest;
 import com.spribe.booking.dto.BookingRequest;
 import com.spribe.booking.dto.BookingResponse;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
@@ -21,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.spribe.booking.exception.ExceptionsUtils.bookingIsBeingProcessedError;
 import static com.spribe.booking.exception.ExceptionsUtils.getMonoError;
+import static com.spribe.booking.exception.ExceptionsUtils.unitIsNotFound;
 import static com.spribe.booking.mapper.BookingMapper.mapBookingRequestFromUnit;
 /**
  * BookingService is a service class that handles booking-related operations.
@@ -42,6 +46,7 @@ public class BookingService {
     private final RedissonClient redissonClient;
     private final UnitService unitService;
     private final TransactionalOperator transactionalOperator;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new booking for a unit.
@@ -56,7 +61,15 @@ public class BookingService {
                    .filter(Boolean::booleanValue)
                    .switchIfEmpty(Mono.defer(() ->  bookingIsBeingProcessedError(lockKey)))
                    .flatMap(unused -> processBookingCreation(request).as(transactionalOperator::transactional))
-                   .flatMap(response -> cacheService.incrementAvailableUnits().thenReturn(response))
+                   .flatMap(bookingResponse -> cacheService.incrementAvailableUnits().thenReturn(bookingResponse))
+                   .map(bookingResponse -> {
+                       eventPublisher.publishEvent(BookingCreatedEvent.builder()
+                                                           .source(this)
+                                                           .bookingId(bookingResponse.id())
+                                                           .expirationMinutes(15)
+                                                           .build());
+                       return bookingResponse;
+                   })
                    .doFinally(signal -> lock.unlockAsync());
     }
 
@@ -86,7 +99,11 @@ public class BookingService {
                    .filter(Boolean::booleanValue)
                    .switchIfEmpty(Mono.defer(() ->  bookingIsBeingProcessedError(lockKey)))
                    .flatMap(unused -> processBookingCancellation(request)).as(transactionalOperator::transactional)
-                   .flatMap(response -> cacheService.incrementAvailableUnits().thenReturn(response))
+                   .flatMap(bookingResponse -> cacheService.incrementAvailableUnits().thenReturn(bookingResponse))
+                   .map(bookingResponse -> {
+                       eventPublisher.publishEvent(new BookingCancelledEvent(this, bookingResponse.id()));
+                       return bookingResponse;
+                   })
                    .doFinally(signal -> lock.unlockAsync());
     }
 
@@ -104,14 +121,15 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.CANCELLED);
         return unitService.setUnitAvailability(booking.getUnitId(), true)
-                          .then(paymentService.updatePayment(booking.getId(), request.paymentStatus()))
+                          .then(paymentService.updatePaymentByBookingId(booking.getId(), request.paymentStatus()))
                           .then(bookingRepository.save(booking))
                           .map(BookingMapper::mapToBookingResponseFromBooking);
     }
 
     private Mono<Unit> checkUnitAvailability(BookingRequest request) {
         return unitRepository.findById(request.unitId())
-                             .flatMap(unit ->findOverlappingBookings(request, unit));
+                             .switchIfEmpty(unitIsNotFound(request.unitId()))
+                             .flatMap(unit -> findOverlappingBookings(request, unit));
     }
 
     private Mono<Unit> findOverlappingBookings(BookingRequest request, Unit unit) {

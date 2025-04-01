@@ -98,7 +98,7 @@ class PaymentServiceUnitTest {
         when(paymentRepository.save(any(Payment.class))).thenReturn(Mono.just(updatedPayment));
 
         // when
-        Mono<Payment> result = paymentService.updatePayment(pendingPayment.getId(), PaymentStatus.COMPLETED);
+        Mono<Payment> result = paymentService.updatePaymentByBookingId(pendingPayment.getBookingId(), PaymentStatus.COMPLETED);
 
         // then
         StepVerifier.create(result)
@@ -119,7 +119,7 @@ class PaymentServiceUnitTest {
                 .thenReturn(Mono.just(completedPayment));
 
         // when
-        Mono<Payment> result = paymentService.updatePayment(completedPayment.getId(), PaymentStatus.CANCELLED);
+        Mono<Payment> result = paymentService.updatePaymentByBookingId(completedPayment.getBookingId(), PaymentStatus.CANCELED);
 
         // then
         StepVerifier.create(result)
@@ -134,7 +134,7 @@ class PaymentServiceUnitTest {
                 .thenReturn(Mono.just(expiredPayment));
 
         // when
-        Mono<Payment> result = paymentService.updatePayment(expiredPayment.getId(), PaymentStatus.COMPLETED);
+        Mono<Payment> result = paymentService.updatePaymentByBookingId(expiredPayment.getBookingId(), PaymentStatus.COMPLETED);
 
         // then
         StepVerifier.create(result)

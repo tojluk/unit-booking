@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,6 +34,7 @@ import static com.spribe.booking.testfixture.TestFixture.createTestUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,6 +63,9 @@ class BookingServiceUnitTest {
 
     @Mock
     private TransactionalOperator transactionalOperator;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private BookingService bookingService;
@@ -99,7 +104,7 @@ class BookingServiceUnitTest {
         when(paymentService.createPayment(any())).thenReturn(Mono.empty());
         when(unitService.setUnitAvailability(any(), eq(false))).thenReturn(Mono.empty());
         when(cacheService.incrementAvailableUnits()).thenReturn(Mono.empty());
-
+        doNothing().when(eventPublisher).publishEvent(any());
         // when
         Mono<BookingResponse> result = bookingService.createBooking(givenRequest);
 
@@ -108,6 +113,7 @@ class BookingServiceUnitTest {
                     .expectNextMatches(response -> response.equals(expected))
                     .verifyComplete();
 
+        verify(eventPublisher).publishEvent(any());
         verify(unitRepository).findById(UNIT_ID);
         verify(bookingRepository).findOverlappingBookings(null, START_DATE, END_DATE);
         verify(bookingRepository).save(bookingSaveCaptor.capture());
